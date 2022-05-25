@@ -857,7 +857,7 @@ $(function () {
 	function initPostEditor(elem) {
 		const loadELe = document.createElement('div');
 		loadELe.className = 'upload-file-loading';
-		loadELe.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;background:#fff;display:block;" width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">\n' +
+		loadELe.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;background:#fff;display:block;" width="50px" height="50px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">\n' +
 			'<circle cx="50" cy="50" r="32" stroke-width="8" stroke="#fe718d" stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round">\n' +
 			'  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50"></animateTransform>\n' +
 			'</circle>\n' +
@@ -971,6 +971,7 @@ $(function () {
 		}
 		const mdeEle = $('.EasyMDEContainer');
 		mdeEle.append(loadELe);
+		$('.upload-file-loading').hide();
 		return mde;
 	}
 
