@@ -49,6 +49,7 @@ import org.springframework.boot.web.server.ErrorPageRegistry;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.servlet.ViewResolver;
@@ -114,6 +115,8 @@ public class ScooldServer extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
 		builder(new SpringApplicationBuilder(), false).run(args);
+		//ParaServer.initialize(ParaServer.getCoreModules());
+		//ParaServer.builder(new SpringApplicationBuilder(), false).run(args);
 	}
 
 	@Override

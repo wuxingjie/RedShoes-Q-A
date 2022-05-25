@@ -195,6 +195,18 @@ public final class ScooldUtils {
 		API_USER.setPicture(avatarRepository.getAnonymizedLink(CONF.supportEmail()));
 	}
 
+	/*
+	 *	DjShank
+	 *   增加的自定义 属性
+	 * */
+
+	/**
+	 * @return 除默认空间,开放给匿名用户的空间
+	 */
+	public Set<String> getAnonymousSpaces(){
+		return CONF.anonymousSpaces();
+	}
+
 	public ParaClient getParaClient() {
 		return pc;
 	}
@@ -1302,7 +1314,29 @@ public final class ScooldUtils {
 		} else if (isDefaultSpace(spaceId) && isMod(authUser)) { // DO NOT MODIFY!
 			return "*";
 		} else {
-			return "properties.space:\"" + spaceId + "\"";
+			// djshank 匿名用户
+			Set<String> anonymousSpaces = new HashSet<>(
+				Set.copyOf(ScooldUtils.getInstance().getAnonymousSpaces())
+			);
+			if(anonymousSpaces.isEmpty()){
+				return "properties.space:\"" + spaceId + "\"";
+			}
+			Set<String>  spaces =
+				ScooldUtils
+					.getInstance()
+					.getAllSpaces()
+					.stream()
+					.filter(s -> anonymousSpaces.contains(s.getName()))
+					.map(s -> s.getId() + Para.getConfig().separator() + s.getName())
+					.collect(Collectors.toSet());
+			spaces.add(spaceId);
+			return
+				"("+
+					spaces
+						.stream()
+						.map(s -> "properties.space:\"" + s + "\"")
+						.collect(Collectors.joining(" OR "))
+					+")";
 		}
 	}
 

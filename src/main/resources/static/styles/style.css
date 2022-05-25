@@ -46,6 +46,20 @@ body {
 	overflow: hidden;
 	max-width: 256px;
 }
+/*DJSHANK*/
+.scoold-logo{
+	display: none;
+	width: 64px;
+}
+.EasyMDEContainer{
+	position: relative;
+}
+.upload-file-loading{
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: calc(100% - 34px);
+}
 .monotext {font-family: monospace;}
 .postbody ul li {list-style-type: disc;}
 .postbody ul {padding-left: 40px;}

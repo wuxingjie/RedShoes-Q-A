@@ -79,7 +79,10 @@ public class QuestionsController {
 
 	@GetMapping({"/", "/questions"})
 	public String get(@RequestParam(required = false) String sortby, HttpServletRequest req, Model model) {
-		if (!utils.isDefaultSpacePublic() && !utils.isAuthenticated(req)) {
+		/*
+		 * DjShank 默认所有问题可见,无序登录
+		 * */
+		if (!utils.isDefaultSpacePublic()) { // && !utils.isAuthenticated(req)
 			return "redirect:" + SIGNINLINK + "?returnto=" + QUESTIONSLINK;
 		}
 		getQuestions(sortby, null, req, model);
@@ -151,7 +154,10 @@ public class QuestionsController {
 	@GetMapping("/questions/{filter}")
 	public String getSorted(@PathVariable(required = false) String filter,
 			@RequestParam(required = false) String sortby, HttpServletRequest req, Model model) {
-		if (!utils.isDefaultSpacePublic() && !utils.isAuthenticated(req)) {
+		/*
+		* DjShank 默认所有问题可见,无序登录
+		* */
+		if (!utils.isDefaultSpacePublic()) {// && !utils.isAuthenticated(req)
 			return "redirect:" + SIGNINLINK + "?returnto=" + req.getRequestURI();
 		}
 		getQuestions(sortby, filter, req, model);

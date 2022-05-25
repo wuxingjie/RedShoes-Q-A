@@ -287,8 +287,8 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
 				<configuration>
-					<!--<argLine>-Xmx256m  ${surefireArgLine}</argLine>-->
-					<skipTests>${skipUTs}</skipTests>
+					<!--<argLine>-Xmx256m  ${}</argLine>-->
+					<skipTestssurefireArgLine>${skipUTs}</skipTestssurefireArgLine>
 					<!--					<parallel>methods</parallel>
 					<threadCount>10</threadCount>
 					<forkCount>2C</forkCount>-->

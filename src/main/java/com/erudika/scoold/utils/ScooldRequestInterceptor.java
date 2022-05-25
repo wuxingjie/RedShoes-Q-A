@@ -19,6 +19,7 @@ package com.erudika.scoold.utils;
 
 import com.erudika.para.core.utils.ParaObjectUtils;
 import com.erudika.para.core.utils.Utils;
+import com.erudika.para.utils.Version;
 import com.erudika.scoold.ScooldConfig;
 import static com.erudika.scoold.ScooldServer.*;
 import com.erudika.scoold.core.Profile;

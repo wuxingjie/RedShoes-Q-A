@@ -6,6 +6,7 @@
 		<h2>$!lang.get("posts.ask")</h2>
 
 		<div class="pts">
+			<input style="display: none" type="file" id="file_input" accept="image/*"/>
 			<form method="post" id="ask-question-form">
 				#sectoken(false "CREATE_POST")
 				<div class="input-field">

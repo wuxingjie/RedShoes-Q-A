@@ -855,14 +855,102 @@ $(function () {
 	});
 
 	function initPostEditor(elem) {
+		const loadELe = document.createElement('div');
+		loadELe.className = 'upload-file-loading';
+		loadELe.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;background:#fff;display:block;" width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">\n' +
+			'<circle cx="50" cy="50" r="32" stroke-width="8" stroke="#fe718d" stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round">\n' +
+			'  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50"></animateTransform>\n' +
+			'</circle>\n' +
+			'</svg>';
+		const fileinput = $('#file_input');
+		if(fileinput){
+			fileinput.change((e) =>{
+				const formData = new FormData();
+				formData.append('file', e);
+				$.ajax({
+					url:"/question/upload",
+					data: formData,
+					processData: false,
+					type: 'POST',
+					success:function(result){
+
+					}
+				});
+			});
+		}
 		var mde = new EasyMDE({
 			element: elem,
 			autoDownloadFontAwesome: false,
 			showIcons: ["code", "table", "strikethrough"],
 			spellChecker: false,
+			minHeight: "500px",
+			maxHeight: "600px",
 			previewRender: function (plainText) {
 				return this.parent.markdown(replaceMentionsWithMarkdownLinks(plainText));
 			},
+			toolbar: [
+				"bold", "italic", "strikethrough", "heading", "heading-smaller",
+				"heading-bigger", "code", "quote", "unordered-list", "ordered-list",
+				"clean-block", "link", "table", "horizontal-rule", "preview",
+				{
+					name : "image",
+					className: "fa fa-picture-o",
+					title: "Image",
+					action: (editor) =>{
+						function _replaceSelection(cm, active, startEnd, url) {
+							if (/editor-preview-active/.test(cm.getWrapperElement().lastChild.className))
+								return;
+
+							var text;
+							var start = startEnd[0];
+							var end = startEnd[1];
+							var startPoint = {},
+								endPoint = {};
+							Object.assign(startPoint, cm.getCursor('start'));
+							Object.assign(endPoint, cm.getCursor('end'));
+							if (url) {
+								start = start.replace('#url#', url);  // url is in start for upload-image
+								end = end.replace('#url#', url);
+							}
+							if (active) {
+								text = cm.getLine(startPoint.line);
+								start = text.slice(0, startPoint.ch);
+								end = text.slice(startPoint.ch);
+								cm.replaceRange(start + end, {
+									line: startPoint.line,
+									ch: 0,
+								});
+							} else {
+								text = cm.getSelection();
+								cm.replaceSelection(start + text + end);
+
+								startPoint.ch += start.length;
+								if (startPoint !== endPoint) {
+									endPoint.ch += start.length;
+								}
+							}
+							cm.setSelection(startPoint, endPoint);
+							cm.focus();
+						};
+
+						var cm = editor.codemirror;
+						var stat = mde.getState();
+						var options = editor.options;
+						var url = 'https://';
+						if (options.promptURLs) {
+							url = prompt(options.promptTexts.image, url);
+							if (!url) {
+								return false;
+							}
+							url = escapePromptURL(url);
+						}
+						$('#file_input').click();
+						_replaceSelection(cm, stat.image, options.insertTexts.image, url);
+					}
+				},
+				"fullscreen",
+				"undo","redo"
+			],
 			status: [{
 				className: "saved",
 				defaultValue: function(el) {
@@ -881,6 +969,8 @@ $(function () {
 			mde.codemirror.options.direction = "rtl";
 			//mde.codemirror.options.rtlMoveVisually = false;
 		}
+		const mdeEle = $('.EasyMDEContainer');
+		mdeEle.append(loadELe);
 		return mde;
 	}
 
@@ -890,7 +980,6 @@ $(function () {
 		var title = askForm.find("input[name=title]");
 		var tags = askForm.find("input[name=tags]");
 		var body = initPostEditor(askForm.find("textarea[name=body]").get(0));
-
 		try {
 			if (!title.val()) title.val(localStorage.getItem("ask-form-title") || "");
 			if (!body.value()) body.value(localStorage.getItem("ask-form-body") || "");

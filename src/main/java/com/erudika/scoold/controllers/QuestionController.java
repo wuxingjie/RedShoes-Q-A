@@ -28,6 +28,8 @@ import com.erudika.para.core.utils.Utils;
 import com.erudika.scoold.ScooldConfig;
 import static com.erudika.scoold.ScooldServer.QUESTIONSLINK;
 import static com.erudika.scoold.ScooldServer.SIGNINLINK;
+
+import com.erudika.scoold.bean.FileDescription;
 import com.erudika.scoold.core.Post;
 import com.erudika.scoold.core.Profile;
 import com.erudika.scoold.core.Profile.Badge;
@@ -39,32 +41,29 @@ import com.erudika.scoold.core.UnapprovedReply;
 import com.erudika.scoold.utils.ScooldUtils;
 import com.erudika.scoold.utils.avatars.AvatarFormat;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.text.MessageFormat;
+import java.util.*;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Produces;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -461,6 +460,41 @@ public class QuestionController {
 			logger.error(null, ex);
 			Thread.currentThread().interrupt();
 		}
+	}
+
+	/**
+	 * djshank
+	 * @param file
+	 * @return fileName
+	 */
+	@PostMapping("/upload")
+	@ResponseBody
+	public String upload(@RequestParam("file") MultipartFile file,HttpServletRequest req) throws IOException {
+		if(!utils.isAuthenticated(req)){
+			return "redirect:" + SIGNINLINK + "?returnto=" + QUESTIONSLINK + "/ask";
+		}
+		String base = CONF.uploadFilePath();
+		Profile user = utils.getAuthUser(req);
+		Path dir = Paths.get(base + user.getName());
+		if(!Files.exists(dir)){
+			Set<PosixFilePermission> posixFilePermissions = PosixFilePermissions.fromString("rwxr-x---");
+			FileAttribute<?> setFileAttribute = PosixFilePermissions.asFileAttribute(posixFilePermissions);
+			if(SystemUtils.IS_OS_UNIX){
+				dir = Files.createDirectories(dir,setFileAttribute);
+			}else {
+				dir = Files.createDirectories(dir);
+			}
+		}
+		String fileName = UUID.randomUUID().toString();
+		FileDescription fileDescription = new FileDescription(
+			base,
+			UUID.randomUUID().toString(),
+			FileDescription.TYPE
+		);
+		String id = fileDescription.create();
+		Path destFilePath = dir.resolve(fileName);
+		file.transferTo(destFilePath);
+		return id;
 	}
 
 	private List<Reply> getAllAnswers(Profile authUser, Post showPost, Pager itemcount) {

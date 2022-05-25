@@ -2061,6 +2061,30 @@ public class ScooldConfig extends Config {
 	 * Customization                                                                                  Customization *
 	 ****************************************************************************************************************/
 
+	/*
+	*	DjShank
+	*   增加的自定义 属性
+	* */
+	@Documented(position = 2020,
+		identifier = "anonymous_spaces",
+		category = "Customization",
+		description = "除默认空间,开放给匿名用户的空间")
+	public Set<String> anonymousSpaces() {
+		String spaceString = getConfigParam("anonymous_spaces", "");
+		if(!spaceString.isEmpty()){
+			String[] spaces = spaceString.split(";");
+			return Set.of(spaces);
+		}
+		return Set.of();
+	}
+	@Documented(position = 2020,
+		identifier = "upload_file_path",
+		category = "Customization",
+		description = "除默认空间,开放给匿名用户的空间")
+	public String uploadFilePath() {
+		return getConfigParam("upload_file_path", "");
+	}
+
 	@Documented(position = 2020,
 			identifier = "default_language_code",
 			category = "Customization",
