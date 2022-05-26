@@ -2071,7 +2071,7 @@ public class ScooldConfig extends Config {
 		description = "除默认空间,开放给匿名用户的空间")
 	public Set<String> anonymousSpaces() {
 		String spaceString = getConfigParam("anonymous_spaces", "");
-		if(!spaceString.isEmpty()){
+		if (!spaceString.isEmpty()) {
 			String[] spaces = spaceString.split(";");
 			return Set.of(spaces);
 		}

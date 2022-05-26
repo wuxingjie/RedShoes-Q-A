@@ -342,6 +342,8 @@
 				<div class="container">
 					<div class="row mbn">
 						<div class="col l7 s12 sTextCenter">
+							<div class="pvl">
+							</div>
 						</div>
 						<div class="col l5 s12 sTextCenter mtm right-align">
 							<a href="$!languageslink" title="Switch to a different language" class="btn-flat grey capitalize">

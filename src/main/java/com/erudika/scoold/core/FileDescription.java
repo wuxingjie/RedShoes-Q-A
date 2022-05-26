@@ -1,23 +1,29 @@
-package com.erudika.scoold.bean;
+package com.erudika.scoold.core;
 
 import com.erudika.para.core.Sysprop;
 import com.erudika.para.core.annotations.Stored;
 
 public class FileDescription extends Sysprop {
-	public static String TYPE = "FileDescription";
 
 	@Stored
 	private String path;
 	@Stored
 	private String fileName;
 
+	public String getPath() {
+		return path;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
 	public FileDescription(
 		String path,
-		String fileName,
-		String type
-	){
+		String fileName
+	) {
 		super();
-		setType(type);
+		setType("FileDescription");
 		this.path = path;
 		this.fileName = fileName;
 	}

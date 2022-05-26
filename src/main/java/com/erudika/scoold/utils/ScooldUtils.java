@@ -203,7 +203,7 @@ public final class ScooldUtils {
 	/**
 	 * @return 除默认空间,开放给匿名用户的空间
 	 */
-	public Set<String> getAnonymousSpaces(){
+	public Set<String> getAnonymousSpaces() {
 		return CONF.anonymousSpaces();
 	}
 
@@ -1318,7 +1318,7 @@ public final class ScooldUtils {
 			Set<String> anonymousSpaces = new HashSet<>(
 				Set.copyOf(ScooldUtils.getInstance().getAnonymousSpaces())
 			);
-			if(anonymousSpaces.isEmpty()){
+			if (anonymousSpaces.isEmpty()) {
 				return "properties.space:\"" + spaceId + "\"";
 			}
 			Set<String>  spaces =
@@ -1331,12 +1331,12 @@ public final class ScooldUtils {
 					.collect(Collectors.toSet());
 			spaces.add(spaceId);
 			return
-				"("+
+				"(" +
 					spaces
 						.stream()
 						.map(s -> "properties.space:\"" + s + "\"")
 						.collect(Collectors.joining(" OR "))
-					+")";
+					+ ")";
 		}
 	}
 

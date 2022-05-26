@@ -20,6 +20,7 @@ package com.erudika.scoold.controllers;
 import com.erudika.para.client.ParaClient;
 import com.erudika.para.core.Address;
 import com.erudika.para.core.ParaObject;
+import com.erudika.para.core.Sysprop;
 import com.erudika.para.core.User;
 import com.erudika.para.core.utils.Pager;
 import com.erudika.para.core.utils.Para;
@@ -29,7 +30,7 @@ import com.erudika.scoold.ScooldConfig;
 import static com.erudika.scoold.ScooldServer.QUESTIONSLINK;
 import static com.erudika.scoold.ScooldServer.SIGNINLINK;
 
-import com.erudika.scoold.bean.FileDescription;
+import com.erudika.scoold.core.FileDescription;
 import com.erudika.scoold.core.Post;
 import com.erudika.scoold.core.Profile;
 import com.erudika.scoold.core.Profile.Badge;
@@ -47,18 +48,18 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.text.MessageFormat;
 import java.util.*;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Produces;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -469,32 +470,54 @@ public class QuestionController {
 	 */
 	@PostMapping("/upload")
 	@ResponseBody
-	public String upload(@RequestParam("file") MultipartFile file,HttpServletRequest req) throws IOException {
-		if(!utils.isAuthenticated(req)){
+	public String upload(@RequestParam("file") MultipartFile file, HttpServletRequest req) throws IOException {
+		if (!utils.isAuthenticated(req)) {
 			return "redirect:" + SIGNINLINK + "?returnto=" + QUESTIONSLINK + "/ask";
 		}
 		String base = CONF.uploadFilePath();
 		Profile user = utils.getAuthUser(req);
 		Path dir = Paths.get(base + user.getName());
-		if(!Files.exists(dir)){
+		if (!Files.exists(dir)) {
 			Set<PosixFilePermission> posixFilePermissions = PosixFilePermissions.fromString("rwxr-x---");
 			FileAttribute<?> setFileAttribute = PosixFilePermissions.asFileAttribute(posixFilePermissions);
-			if(SystemUtils.IS_OS_UNIX){
-				dir = Files.createDirectories(dir,setFileAttribute);
-			}else {
+			if (SystemUtils.IS_OS_UNIX) {
+				dir = Files.createDirectories(dir, setFileAttribute);
+			} else {
 				dir = Files.createDirectories(dir);
 			}
 		}
-		String fileName = UUID.randomUUID().toString();
+		String fileName = file.getOriginalFilename();
 		FileDescription fileDescription = new FileDescription(
-			base,
-			UUID.randomUUID().toString(),
-			FileDescription.TYPE
+			base + user.getName(),
+			fileName
 		);
-		String id = fileDescription.create();
+		String id = ScooldUtils.getInstance().getParaClient().create(fileDescription).getId();
 		Path destFilePath = dir.resolve(fileName);
 		file.transferTo(destFilePath);
 		return id;
+	}
+
+	/**
+	 * djshank 预览图片
+	 * @return image
+	 */
+	@GetMapping("/pre_img/{id}")
+	@ResponseBody
+	public ResponseEntity<byte[]> viewImage(@PathVariable("id") String id) throws Exception {
+		Sysprop fileDescription = pc.findById(id);
+		Path dir = Paths.get(fileDescription.getProperties().get("path").toString());
+		String fileName = fileDescription.getProperties().get("fileName").toString();
+		Path path = dir.resolve(fileName);
+		try {
+			byte[] data = Files.readAllBytes(path);
+			return ResponseEntity.ok()
+								.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileName)
+								.contentType(MediaType.APPLICATION_OCTET_STREAM)
+								.body(data);
+
+		} catch (IOException e) {
+			throw new Exception("文件找不到");
+		}
 	}
 
 	private List<Reply> getAllAnswers(Profile authUser, Post showPost, Pager itemcount) {

@@ -795,6 +795,7 @@
 
 	#if ($scooldUtils.canEdit($showpost, $authUser))
 	<div class="editbox pvm hide">
+		<input style="display: none" type="file" id="file_input" accept="image/*"/>
 		<form method="post" action="$questionlink/$!showpost.id/edit" class="edit-post-form">
 			#sectoken(false "EDIT_POST_$!showpost.id")
 

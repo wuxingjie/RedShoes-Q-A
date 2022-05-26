@@ -157,7 +157,7 @@ public class QuestionsController {
 		/*
 		* DjShank 默认所有问题可见,无序登录
 		* */
-		if (!utils.isDefaultSpacePublic()) {// && !utils.isAuthenticated(req)
+		if (!utils.isDefaultSpacePublic()) { // && !utils.isAuthenticated(req)
 			return "redirect:" + SIGNINLINK + "?returnto=" + req.getRequestURI();
 		}
 		getQuestions(sortby, filter, req, model);

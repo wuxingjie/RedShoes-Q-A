@@ -862,22 +862,7 @@ $(function () {
 			'  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" keyTimes="0;1" values="0 50 50;360 50 50"></animateTransform>\n' +
 			'</circle>\n' +
 			'</svg>';
-		const fileinput = $('#file_input');
-		if(fileinput){
-			fileinput.change((e) =>{
-				const formData = new FormData();
-				formData.append('file', e);
-				$.ajax({
-					url:"/question/upload",
-					data: formData,
-					processData: false,
-					type: 'POST',
-					success:function(result){
 
-					}
-				});
-			});
-		}
 		var mde = new EasyMDE({
 			element: elem,
 			autoDownloadFontAwesome: false,
@@ -897,6 +882,46 @@ $(function () {
 					className: "fa fa-picture-o",
 					title: "Image",
 					action: (editor) =>{
+						$('#file_input').click();
+					}
+				},
+				"fullscreen",
+				"undo","redo"
+			],
+			status: [{
+				className: "saved",
+				defaultValue: function(el) {
+					el.innerHTML = "";
+					$(document).on("event:post-edit-saved", function () {
+						el.innerHTML = "<b class='green-text'>saved</b>";
+						$(el).show().delay(2000).fadeOut();
+					});
+				},
+				onUpdate: function(el) {
+					el.innerHTML = "";
+				}
+			}, "lines", "words", "cursor"]
+		});
+		if (RTL_ENABLED) {
+			mde.codemirror.options.direction = "rtl";
+			//mde.codemirror.options.rtlMoveVisually = false;
+		}
+
+		const fileinput = $('#file_input');
+		if(fileinput){
+			fileinput.change((e) =>{
+				const formData = new FormData();
+				formData.append('file', e.target.files[0]);
+				$('.upload-file-loading').show();
+				$.ajax({
+					url:"/question/upload",
+					data: formData,
+					contentType: false,
+					processData: false,
+					type: 'POST',
+					success:function(result){
+						$('.upload-file-loading').hide();
+
 						function _replaceSelection(cm, active, startEnd, url) {
 							if (/editor-preview-active/.test(cm.getWrapperElement().lastChild.className))
 								return;
@@ -933,10 +958,10 @@ $(function () {
 							cm.focus();
 						};
 
-						var cm = editor.codemirror;
+						var cm = mde.codemirror;
 						var stat = mde.getState();
-						var options = editor.options;
-						var url = 'https://';
+						var options = mde.options;
+						var url = window.location.origin + '/question/pre_img/'+result;
 						if (options.promptURLs) {
 							url = prompt(options.promptTexts.image, url);
 							if (!url) {
@@ -944,30 +969,11 @@ $(function () {
 							}
 							url = escapePromptURL(url);
 						}
-						$('#file_input').click();
 						_replaceSelection(cm, stat.image, options.insertTexts.image, url);
+						console.log(result);
 					}
-				},
-				"fullscreen",
-				"undo","redo"
-			],
-			status: [{
-				className: "saved",
-				defaultValue: function(el) {
-					el.innerHTML = "";
-					$(document).on("event:post-edit-saved", function () {
-						el.innerHTML = "<b class='green-text'>saved</b>";
-						$(el).show().delay(2000).fadeOut();
-					});
-				},
-				onUpdate: function(el) {
-					el.innerHTML = "";
-				}
-			}, "lines", "words", "cursor"]
-		});
-		if (RTL_ENABLED) {
-			mde.codemirror.options.direction = "rtl";
-			//mde.codemirror.options.rtlMoveVisually = false;
+				});
+			});
 		}
 		const mdeEle = $('.EasyMDEContainer');
 		mdeEle.append(loadELe);
