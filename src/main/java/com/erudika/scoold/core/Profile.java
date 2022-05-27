@@ -31,16 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.IsoFields;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.URL;
@@ -168,18 +159,25 @@ public class Profile extends Sysprop {
 		p.setGroups(ScooldUtils.getInstance().isRecognizedAsAdmin(u)
 				? User.Groups.ADMINS.toString() : u.getGroups());
 		// auto-assign spaces to new users
-		String space = StringUtils.substringBefore(ScooldUtils.getConfig().autoAssignSpaces(), ",");
-		if (!StringUtils.isBlank(space) && !ScooldUtils.getInstance().isDefaultSpace(space)) {
-			Sysprop s = client().read(ScooldUtils.getInstance().getSpaceId(space));
-			if (s == null) {
-				s = ScooldUtils.getInstance().buildSpaceObject(space);
-				client().create(s); // create the space it it's missing
-			}
-			if (ScooldUtils.getConfig().resetSpacesOnNewAssignment(u.isOAuth2User() || u.isLDAPUser() || u.isSAMLUser())) {
-				p.setSpaces(Collections.singleton(s.getId() + Para.getConfig().separator() + s.getName()));
-			} else {
-				p.getSpaces().add(s.getId() + Para.getConfig().separator() + s.getName());
-			}
+		String space = ScooldUtils.getConfig().autoAssignSpaces();
+		if (!StringUtils.isBlank(space)) {
+			String[] spaces = space.split(",");
+			Arrays
+				.stream(spaces)
+				.forEach(sp->{
+					if (!ScooldUtils.getInstance().isDefaultSpace(sp)) {
+						Sysprop s = client().read(ScooldUtils.getInstance().getSpaceId(sp));
+						if (s == null) {
+							s = ScooldUtils.getInstance().buildSpaceObject(sp);
+							client().create(s); // create the space it it's missing
+						}
+						if (ScooldUtils.getConfig().resetSpacesOnNewAssignment(u.isOAuth2User() || u.isLDAPUser() || u.isSAMLUser())) {
+							p.setSpaces(Collections.singleton(s.getId() + Para.getConfig().separator() + s.getName()));
+						} else {
+							p.getSpaces().add(s.getId() + Para.getConfig().separator() + s.getName());
+						}
+					}
+				});
 		}
 		return p;
 	}
